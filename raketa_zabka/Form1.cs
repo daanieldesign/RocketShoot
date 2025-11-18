@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Data.SQLite;
 
 namespace raketa_zabka
 {
@@ -33,6 +34,27 @@ namespace raketa_zabka
         public Form1()
         {
             InitializeComponent();
+
+            string cesta = "Data Source=databaze.db";
+
+            using (var conn = new SQLiteConnection(cesta))
+            {
+                conn.Open();
+
+                string sql = @"CREATE TABLE IF NOT EXISTS ScoreLog (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Jmeno TEXT,
+                    Skore INT,
+                    Zivoty INT,
+                    Palivo INT,
+                    Datum TEXT
+                  );";
+
+                using (var cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
 
             this.KeyPreview = true;
             this.KeyDown += Form1_KeyDown;
@@ -163,6 +185,7 @@ namespace raketa_zabka
             if (zivoty <= 0 || palivo <= 0)
             {
                 Casovac.Stop();
+                UlozSkoreDoDatabaze();
                 DialogResult result = MessageBox.Show(
                     $"Konec hry!\nTvoje skóre: {skore}\nChceš hrát znovu?",
                     "Game Over",
@@ -177,6 +200,38 @@ namespace raketa_zabka
                 else
                 {
                     this.Close();
+                }
+            }
+        }
+
+        private void button1_Click_Results(object sender, EventArgs e)
+        {
+            FormSkore f = new FormSkore();
+            f.Show();
+        }
+
+
+        private void UlozSkoreDoDatabaze()
+        {
+            MessageBox.Show("Spouštím INSERT!");
+
+            string cesta = "Data Source=databaze.db";
+
+            using (SQLiteConnection conn = new SQLiteConnection(cesta))
+            {
+                conn.Open();
+
+                string sql = "INSERT INTO ScoreLog (Jmeno, Skore, Zivoty, Palivo, Datum) VALUES (@j, @s, @z, @p, @d)";
+
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("@j", textBoxJmeno.Text);
+                    cmd.Parameters.AddWithValue("@s", skore);
+                    cmd.Parameters.AddWithValue("@z", zivoty);
+                    cmd.Parameters.AddWithValue("@p", palivo);
+                    cmd.Parameters.AddWithValue("@d", DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
+
+                    cmd.ExecuteNonQuery();
                 }
             }
         }
@@ -304,6 +359,11 @@ namespace raketa_zabka
 
             if (labelInfo != null)
                 labelInfo.Text = $"Skóre: {skore} | Životy: {zivoty} | Palivo: {palivo}%";
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+            FormSkore f = new FormSkore(); f.Show();
         }
     }
 }
