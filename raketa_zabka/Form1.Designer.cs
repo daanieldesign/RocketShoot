@@ -40,19 +40,19 @@
             this.Meteorit = new System.Windows.Forms.PictureBox();
             this.Raketa = new System.Windows.Forms.PictureBox();
             this.groupBoxOvladani = new System.Windows.Forms.GroupBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.buttonStart = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
             this.buttonReset = new System.Windows.Forms.Button();
             this.trackBarSpeed = new System.Windows.Forms.TrackBar();
             this.labelSpeed = new System.Windows.Forms.Label();
             this.labelSpeedValue = new System.Windows.Forms.Label();
-            this.progressBarFuel = new System.Windows.Forms.ProgressBar();
             this.labelInfo = new System.Windows.Forms.Label();
+            this.progressBarFuel = new System.Windows.Forms.ProgressBar();
             this.txtSkore = new System.Windows.Forms.Label();
             this.boxSkore = new System.Windows.Forms.MaskedTextBox();
             this.textBoxJmeno = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.Zivot3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Zivot2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Zivot1)).BeginInit();
@@ -187,6 +187,17 @@
             this.groupBoxOvladani.TabStop = false;
             this.groupBoxOvladani.Text = "Ovládání";
             // 
+            // button1
+            // 
+            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.button1.Location = new System.Drawing.Point(444, 2);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(237, 46);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "Zobrazit výsledky";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click_Results);
+            // 
             // buttonStart
             // 
             this.buttonStart.Location = new System.Drawing.Point(20, 25);
@@ -251,14 +262,6 @@
             this.labelSpeedValue.TabIndex = 5;
             this.labelSpeedValue.Text = "10";
             // 
-            // progressBarFuel
-            // 
-            this.progressBarFuel.Location = new System.Drawing.Point(639, 413);
-            this.progressBarFuel.Name = "progressBarFuel";
-            this.progressBarFuel.Size = new System.Drawing.Size(150, 23);
-            this.progressBarFuel.TabIndex = 6;
-            this.progressBarFuel.Value = 100;
-            // 
             // labelInfo
             // 
             this.labelInfo.AutoSize = true;
@@ -268,6 +271,14 @@
             this.labelInfo.Size = new System.Drawing.Size(281, 24);
             this.labelInfo.TabIndex = 7;
             this.labelInfo.Text = "Skóre: 0 | Životy: 3 | Palivo: 100%";
+            // 
+            // progressBarFuel
+            // 
+            this.progressBarFuel.Location = new System.Drawing.Point(639, 413);
+            this.progressBarFuel.Name = "progressBarFuel";
+            this.progressBarFuel.Size = new System.Drawing.Size(150, 23);
+            this.progressBarFuel.TabIndex = 6;
+            this.progressBarFuel.Value = 100;
             // 
             // txtSkore
             // 
@@ -288,12 +299,13 @@
             this.boxSkore.TabIndex = 5;
             this.boxSkore.TabStop = false;
             // 
-            // textBox1
+            // textBoxJmeno
             // 
             this.textBoxJmeno.Location = new System.Drawing.Point(499, 413);
-            this.textBoxJmeno.Name = "textBox1";
+            this.textBoxJmeno.Name = "textBoxJmeno";
             this.textBoxJmeno.Size = new System.Drawing.Size(100, 20);
             this.textBoxJmeno.TabIndex = 11;
+            this.textBoxJmeno.TabStop = false;
             // 
             // label1
             // 
@@ -304,17 +316,6 @@
             this.label1.TabIndex = 11;
             this.label1.Text = "Jméno hráče";
             this.label1.Click += new System.EventHandler(this.label1_Click);
-            // 
-            // button1
-            // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.button1.Location = new System.Drawing.Point(444, 2);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(237, 46);
-            this.button1.TabIndex = 8;
-            this.button1.Text = "Zobrazit výsledky";
-            this.button1.Click += new System.EventHandler(this.button1_Click_Results);
-            this.button1.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
