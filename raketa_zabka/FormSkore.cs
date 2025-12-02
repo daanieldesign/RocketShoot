@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Data.SQLite;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace raketa_zabka
@@ -17,19 +11,40 @@ namespace raketa_zabka
         {
             InitializeComponent();
 
+            // Načteme data při otevření (Show / ShowDialog)
+            this.Shown += FormSkore_Shown;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void FormSkore_Shown(object sender, EventArgs e)
         {
-            using (SQLiteConnection conn = new SQLiteConnection("Data Source=databaze.db"))
+            NactiVysledky();
+        }
+
+        private void btnNacist_Click(object sender, EventArgs e)
+        {
+            NactiVysledky();
+        }
+
+        private void NactiVysledky()
+        {
+            try
             {
-                conn.Open();
+                using (SQLiteConnection conn = new SQLiteConnection("Data Source=databaze.db"))
+                {
+                    conn.Open();
 
-                SQLiteDataAdapter da = new SQLiteDataAdapter("SELECT * FROM ScoreLog ORDER BY Id DESC", conn);
-                DataTable dt = new DataTable();
-                da.Fill(dt);
+                    SQLiteDataAdapter da = new SQLiteDataAdapter("SELECT Id, Jmeno, Skore, Zivoty, Palivo, Datum FROM ScoreLog ORDER BY Id DESC", conn);
+                    DataTable dt = new DataTable();
+                    da.Fill(dt);
 
-                dataGridView1.DataSource = dt;
+                    // Pokud byly starší návrhy s názvy dataGridView1/ dataGridViewSkore, použijeme dataGridView1
+                    dataGridView1.DataSource = dt;
+                    dataGridView1.AutoResizeColumns();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Chyba při načítání výsledků: " + ex.Message, "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
