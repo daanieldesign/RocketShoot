@@ -140,6 +140,15 @@
   <ItemGroup>
     <None Include="Resources\Poznámka 2022-10-06 113933.jpg" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pngtree-missile-rocket-ammunition-war-conflict-military-warhead-nuclear-weapon-bomb-3d-png-image_166449861.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pngtree-meteor-fall-with-fire-png-image_133829411.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\pngtree-meteor-fall-with-fire-png-image_133829412.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -36,13 +36,8 @@
 
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.txt_heading = new System.Windows.Forms.Label();
-            this.hraciPlocha = new System.Windows.Forms.GroupBox();
-            this.Meteorit = new System.Windows.Forms.PictureBox();
-            this.Raketa = new System.Windows.Forms.PictureBox();
-            this.Zivot1 = new System.Windows.Forms.PictureBox();
-            this.Zivot2 = new System.Windows.Forms.PictureBox();
-            this.Zivot3 = new System.Windows.Forms.PictureBox();
             this.txtZivoty = new System.Windows.Forms.Label();
             this.txtPalivo = new System.Windows.Forms.Label();
             this.boxPalivo = new System.Windows.Forms.MaskedTextBox();
@@ -60,14 +55,20 @@
             this.textBoxJmeno = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBoxOvladani = new System.Windows.Forms.GroupBox();
+            this.Zivot3 = new System.Windows.Forms.PictureBox();
+            this.Zivot2 = new System.Windows.Forms.PictureBox();
+            this.Zivot1 = new System.Windows.Forms.PictureBox();
+            this.hraciPlocha = new System.Windows.Forms.GroupBox();
+            this.Meteorit = new System.Windows.Forms.PictureBox();
+            this.Raketa = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.trackBarSpeed)).BeginInit();
+            this.groupBoxOvladani.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Zivot3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Zivot2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Zivot1)).BeginInit();
             this.hraciPlocha.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Meteorit)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Raketa)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Zivot1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Zivot2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Zivot3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.trackBarSpeed)).BeginInit();
-            this.groupBoxOvladani.SuspendLayout();
             this.SuspendLayout();
             // 
             // txt_heading
@@ -79,68 +80,6 @@
             this.txt_heading.Size = new System.Drawing.Size(103, 20);
             this.txt_heading.TabIndex = 0;
             this.txt_heading.Text = "RocketShoot";
-            // 
-            // hraciPlocha
-            // 
-            this.hraciPlocha.BackColor = System.Drawing.SystemColors.ControlDark;
-            this.hraciPlocha.BackgroundImage = global::raketa_zabka.Properties.Resources.Poznámka_2022_10_06_113933;
-            this.hraciPlocha.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.hraciPlocha.Controls.Add(this.Meteorit);
-            this.hraciPlocha.Controls.Add(this.Raketa);
-            this.hraciPlocha.Location = new System.Drawing.Point(-4, -5);
-            this.hraciPlocha.Name = "hraciPlocha";
-            this.hraciPlocha.Size = new System.Drawing.Size(811, 398);
-            this.hraciPlocha.TabIndex = 1;
-            this.hraciPlocha.TabStop = false;
-            // 
-            // Meteorit
-            // 
-            this.Meteorit.BackColor = System.Drawing.Color.Transparent;
-            this.Meteorit.BackgroundImage = global::raketa_zabka.Properties.Resources.pngtree_meteor_fall_with_fire_png_image_13382941;
-            this.Meteorit.Location = new System.Drawing.Point(346, 52);
-            this.Meteorit.Name = "Meteorit";
-            this.Meteorit.Size = new System.Drawing.Size(50, 52);
-            this.Meteorit.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.Meteorit.TabIndex = 1;
-            this.Meteorit.TabStop = false;
-            // 
-            // Raketa
-            // 
-            this.Raketa.BackColor = System.Drawing.Color.Transparent;
-            this.Raketa.BackgroundImage = global::raketa_zabka.Properties.Resources.pngtree_missile_rocket_ammunition_war_conflict_military_warhead_nuclear_weapon_bomb_3d_png_image_16644986;
-            this.Raketa.Location = new System.Drawing.Point(384, 119);
-            this.Raketa.Name = "Raketa";
-            this.Raketa.Size = new System.Drawing.Size(71, 83);
-            this.Raketa.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.Raketa.TabIndex = 0;
-            this.Raketa.TabStop = false;
-            // 
-            // Zivot1
-            // 
-            this.Zivot1.Location = new System.Drawing.Point(192, 413);
-            this.Zivot1.Name = "Zivot1";
-            this.Zivot1.Size = new System.Drawing.Size(32, 20);
-            this.Zivot1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.Zivot1.TabIndex = 7;
-            this.Zivot1.TabStop = false;
-            // 
-            // Zivot2
-            // 
-            this.Zivot2.Location = new System.Drawing.Point(230, 413);
-            this.Zivot2.Name = "Zivot2";
-            this.Zivot2.Size = new System.Drawing.Size(32, 20);
-            this.Zivot2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.Zivot2.TabIndex = 8;
-            this.Zivot2.TabStop = false;
-            // 
-            // Zivot3
-            // 
-            this.Zivot3.Location = new System.Drawing.Point(268, 413);
-            this.Zivot3.Name = "Zivot3";
-            this.Zivot3.Size = new System.Drawing.Size(32, 20);
-            this.Zivot3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.Zivot3.TabIndex = 9;
-            this.Zivot3.TabStop = false;
             // 
             // txtZivoty
             // 
@@ -312,6 +251,70 @@
             this.groupBoxOvladani.TabStop = false;
             this.groupBoxOvladani.Text = "Ovládání";
             // 
+            // Zivot3
+            // 
+            this.Zivot3.Location = new System.Drawing.Point(268, 413);
+            this.Zivot3.Name = "Zivot3";
+            this.Zivot3.Size = new System.Drawing.Size(32, 20);
+            this.Zivot3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Zivot3.TabIndex = 9;
+            this.Zivot3.TabStop = false;
+            // 
+            // Zivot2
+            // 
+            this.Zivot2.Location = new System.Drawing.Point(230, 413);
+            this.Zivot2.Name = "Zivot2";
+            this.Zivot2.Size = new System.Drawing.Size(32, 20);
+            this.Zivot2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Zivot2.TabIndex = 8;
+            this.Zivot2.TabStop = false;
+            // 
+            // Zivot1
+            // 
+            this.Zivot1.Location = new System.Drawing.Point(192, 413);
+            this.Zivot1.Name = "Zivot1";
+            this.Zivot1.Size = new System.Drawing.Size(32, 20);
+            this.Zivot1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Zivot1.TabIndex = 7;
+            this.Zivot1.TabStop = false;
+            // 
+            // hraciPlocha
+            // 
+            this.hraciPlocha.BackColor = System.Drawing.SystemColors.ControlDark;
+            this.hraciPlocha.BackgroundImage = global::raketa_zabka.Properties.Resources.Poznámka_2022_10_06_113933;
+            this.hraciPlocha.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.hraciPlocha.Controls.Add(this.Meteorit);
+            this.hraciPlocha.Controls.Add(this.Raketa);
+            this.hraciPlocha.Location = new System.Drawing.Point(-4, -5);
+            this.hraciPlocha.Name = "hraciPlocha";
+            this.hraciPlocha.Size = new System.Drawing.Size(811, 398);
+            this.hraciPlocha.TabIndex = 1;
+            this.hraciPlocha.TabStop = false;
+            // 
+            // Meteorit
+            // 
+            this.Meteorit.BackColor = System.Drawing.Color.Transparent;
+            this.Meteorit.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("Meteorit.BackgroundImage")));
+            this.Meteorit.Image = global::raketa_zabka.Properties.Resources.pngtree_meteor_fall_with_fire_png_image_133829412;
+            this.Meteorit.Location = new System.Drawing.Point(346, 52);
+            this.Meteorit.Name = "Meteorit";
+            this.Meteorit.Size = new System.Drawing.Size(50, 52);
+            this.Meteorit.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Meteorit.TabIndex = 1;
+            this.Meteorit.TabStop = false;
+            // 
+            // Raketa
+            // 
+            this.Raketa.BackColor = System.Drawing.Color.Transparent;
+            this.Raketa.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("Raketa.BackgroundImage")));
+            this.Raketa.Image = global::raketa_zabka.Properties.Resources.pngtree_missile_rocket_ammunition_war_conflict_military_warhead_nuclear_weapon_bomb_3d_png_image_16644986;
+            this.Raketa.Location = new System.Drawing.Point(384, 119);
+            this.Raketa.Name = "Raketa";
+            this.Raketa.Size = new System.Drawing.Size(71, 83);
+            this.Raketa.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.Raketa.TabIndex = 0;
+            this.Raketa.TabStop = false;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -333,15 +336,15 @@
             this.Controls.Add(this.groupBoxOvladani);
             this.Name = "Form1";
             this.Text = "RocketShoot";
-            this.hraciPlocha.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.Meteorit)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Raketa)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Zivot1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Zivot2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Zivot3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trackBarSpeed)).EndInit();
             this.groupBoxOvladani.ResumeLayout(false);
             this.groupBoxOvladani.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Zivot3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Zivot2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Zivot1)).EndInit();
+            this.hraciPlocha.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.Meteorit)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.Raketa)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

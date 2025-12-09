@@ -8,144 +8,282 @@ namespace raketa_zabka
 {
     public partial class Form1 : Form
     {
+        // --- HERNÍ PROMĚNNÉ ---
         int raketaRychlost = 10;
         int meteoritRychlost = 10;
         int skore = 0;
         int zivoty = 3;
         int palivo = 100;
+
         Random rnd = new Random();
 
         bool pohybVlevo = false;
         bool pohybVpravo = false;
 
         PictureBox[] meteory;
-        PictureBox srdce;
+        PictureBox srdce; // Objekt pro padající bonus
         Timer Casovac = new Timer();
-        private int pohybovyTik = 0;
 
-        private int srdceCooldown = 0;
+        private int pohybovyTik = 0;
+        private int srdceCooldown = 0; // Odpočet do dalšího srdce
         private string playerName = "Hráč";
 
         public Form1()
         {
             InitializeComponent();
 
-            // Vytvoření tabulky pokud neexistuje
-            string cesta = "Data Source=databaze.db";
-            using (var conn = new SQLiteConnection(cesta))
-            {
-                conn.Open();
-                string sql = @"CREATE TABLE IF NOT EXISTS ScoreLog (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Jmeno TEXT,
-                    Skore INT,
-                    Zivoty INT,
-                    Palivo INT,
-                    Datum TEXT
-                  );";
-                using (var cmd = new SQLiteCommand(sql, conn))
-                    cmd.ExecuteNonQuery();
-            }
+            // 1. Databáze
+            InicializujDatabazi();
 
+            // 2. Klávesnice
             this.KeyPreview = true;
             this.KeyDown += Form1_KeyDown;
             this.KeyUp += Form1_KeyUp;
 
-            // Inicializace pozic
+            // 3. Raketa
+            Raketa.Parent = hraciPlocha;
             Raketa.Left = hraciPlocha.Width / 2 - Raketa.Width / 2;
             Raketa.Top = hraciPlocha.Height - Raketa.Height - 10;
+            Raketa.BringToFront();
 
-            // Meteory
+            // 4. Meteory
+            Meteorit.Parent = hraciPlocha;
             PictureBox meteor1 = Meteorit;
             PictureBox meteor2 = VytvorMeteor(meteor1);
             PictureBox meteor3 = VytvorMeteor(meteor1);
 
             meteory = new PictureBox[] { meteor1, meteor2, meteor3 };
             foreach (var meteor in meteory)
+            {
                 ResetujMeteor(meteor);
+                meteor.BringToFront();
+            }
 
-            // Bonusové srdce
+            // 5. NASTAVENÍ PADAJÍCÍHO SRDÍČKA
             srdce = new PictureBox();
-            srdce.Size = new Size(25, 25);
-            srdce.Image = Zivot1.Image;
-            srdce.SizeMode = PictureBoxSizeMode.Zoom;
-            srdce.Visible = false;
-            hraciPlocha.Controls.Add(srdce);
+            srdce.Size = new Size(30, 30); // Velikost srdíčka
 
-            // Timer (nepustíme ho hned - spustíme po zadání jména)
+            // Vezmeme obrázek z ukazatele životů (pokud existuje)
+            if (Zivot1.Image != null)
+                srdce.Image = Zivot1.Image;
+            else
+                srdce.BackColor = Color.Red; // Kdyby nebyl obrázek, bude to červený čtverec
+
+            srdce.SizeMode = PictureBoxSizeMode.Zoom;
+            srdce.BackColor = Color.Transparent;
+            srdce.Visible = false; // Na začátku není vidět
+            srdce.Parent = hraciPlocha; // Důležité pro průhlednost
+            hraciPlocha.Controls.Add(srdce);
+            srdce.BringToFront();
+
+            // 6. Timer
             Casovac.Interval = 50;
             Casovac.Tick += GameLoop;
 
-            // Nastav textBoxJmeno neinteraktivní (bude nastaven po zadání jména)
-            textBoxJmeno.TabStop = false;
-            textBoxJmeno.ReadOnly = true;
-            textBoxJmeno.Enabled = false;
+            // 7. GUI stav
+            NastavStavHry(false);
 
-            // Zeptej se na jméno hráče a spusť hru
+            // Start
+            ZiskejJmenoASpust();
+        }
+
+        // --- ŘEŠENÍ OVLÁDÁNÍ (aby fungovaly šipky i při zablokovaných tlačítkách) ---
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (Casovac.Enabled)
+            {
+                if (keyData == Keys.Left)
+                {
+                    pohybVlevo = true;
+                    return true;
+                }
+                if (keyData == Keys.Right)
+                {
+                    pohybVpravo = true;
+                    return true;
+                }
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void GameLoop(object sender, EventArgs e)
+        {
+            // 1. POHYB RAKETY
+            if (pohybVlevo && Raketa.Left > 0) Raketa.Left -= raketaRychlost;
+            if (pohybVpravo && Raketa.Right < hraciPlocha.Width) Raketa.Left += raketaRychlost;
+
+            // 2. PALIVO
+            bool hybeSe = pohybVlevo || pohybVpravo;
+            if (hybeSe)
+            {
+                pohybovyTik++;
+                if (pohybovyTik >= 5)
+                {
+                    palivo--;
+                    pohybovyTik = 0;
+                }
+            }
+            if (palivo < 0) palivo = 0;
+
+            // 3. METEORY (Pohyb a kolize)
+            foreach (var meteor in meteory)
+            {
+                meteor.Top += meteoritRychlost;
+
+                // Propadl dolů -> bod
+                if (meteor.Top > hraciPlocha.Height)
+                {
+                    skore++;
+                    ResetujMeteor(meteor);
+                }
+
+                // Srážka s raketou -> ubrat život
+                if (Raketa.Bounds.IntersectsWith(meteor.Bounds))
+                {
+                    ResetujMeteor(meteor);
+                    ZtrataZivota(); // Ubere život
+                }
+            }
+
+            // 4. LOGIKA PRO PADAJÍCÍ SRDCE (Doplnění života)
+
+            // Odpočet (aby nepadala pořád)
+            if (srdceCooldown > 0) srdceCooldown--;
+
+            // Pokud srdce není na scéně a odpočet doběhl
+            if (!srdce.Visible && srdceCooldown <= 0)
+            {
+                // Srdce pošleme dolů jen pokud hráč není plně uzdravený (má méně než 3 životy)
+                // Pokud chceš, aby padala i tak (třeba pro skóre), smaž podmínku "zivoty < 3"
+                if (zivoty < 3)
+                {
+                    srdce.Left = rnd.Next(0, hraciPlocha.Width - srdce.Width);
+                    srdce.Top = -srdce.Height;
+                    srdce.Visible = true;
+                    srdce.BringToFront(); // Ujistíme se, že je vidět nad pozadím
+                }
+
+                // Nastavíme náhodný čas, kdy zkusit poslat další (cca každých 100-300 tiků)
+                srdceCooldown = rnd.Next(100, 300);
+            }
+
+            // Pohyb srdce
+            if (srdce.Visible)
+            {
+                srdce.Top += meteoritRychlost; // Padá stejně rychle jako meteory
+
+                // Pokud propadne dolů, zmizí
+                if (srdce.Top > hraciPlocha.Height)
+                {
+                    srdce.Visible = false;
+                }
+
+                // HRÁČ CHYTIL SRDCE
+                if (Raketa.Bounds.IntersectsWith(srdce.Bounds))
+                {
+                    if (zivoty < 3)
+                    {
+                        zivoty++; // Přidat život
+                        AktualizujZivoty();
+                    }
+                    // Můžeme přidat i skóre za sebrání srdce
+                    skore += 50;
+
+                    srdce.Visible = false; // Skrýt srdce po sebrání
+                }
+            }
+
+            // 5. UPDATE GUI
+            AktualizujGUI();
+
+            // 6. KONEC HRY
+            if (zivoty <= 0 || palivo <= 0) GameOver();
+        }
+
+        // --- ZBYTEK FUNKCÍ (Iniciatlizace, Reset, GUI atd.) ---
+
+        private void InicializujDatabazi()
+        {
+            string cesta = "Data Source=databaze.db";
+            using (var conn = new SQLiteConnection(cesta))
+            {
+                conn.Open();
+                string sql = @"CREATE TABLE IF NOT EXISTS ScoreLog (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Jmeno TEXT, Skore INT, Zivoty INT, Palivo INT, Datum TEXT);";
+                using (var cmd = new SQLiteCommand(sql, conn)) cmd.ExecuteNonQuery();
+            }
+        }
+
+        private void ZiskejJmenoASpust()
+        {
             playerName = AskForPlayerName();
             textBoxJmeno.Text = playerName;
-            StartGameAfterName();
+            StartGame();
         }
 
         private string AskForPlayerName()
         {
-            // Jednoduchý modalní dialog vytvořený za běhu (nemusíš přidávat další soubory)
             using (Form f = new Form())
             {
-                f.StartPosition = FormStartPosition.CenterParent;
+                f.StartPosition = FormStartPosition.CenterScreen;
                 f.FormBorderStyle = FormBorderStyle.FixedDialog;
+                f.ControlBox = false;
                 f.ClientSize = new Size(400, 120);
                 f.Text = "Zadej jméno hráče";
-
-                Label lbl = new Label() { Left = 12, Top = 15, Width = 370, Text = "Prosím zadej své jméno (bude použito pro ukládání skóre):" };
+                Label lbl = new Label() { Left = 12, Top = 15, Width = 370, Text = "Prosím zadej své jméno:" };
                 TextBox txt = new TextBox() { Left = 12, Top = 40, Width = 370 };
-                Button ok = new Button() { Text = "OK", Left = 220, Width = 80, Top = 72, DialogResult = DialogResult.OK };
-                Button cancel = new Button() { Text = "Zrušit", Left = 310, Width = 80, Top = 72, DialogResult = DialogResult.Cancel };
-
-                ok.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-                cancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-
-                f.Controls.AddRange(new Control[] { lbl, txt, ok, cancel });
+                Button ok = new Button() { Text = "Hrát", Left = 150, Width = 100, Top = 72, DialogResult = DialogResult.OK };
+                f.Controls.AddRange(new Control[] { lbl, txt, ok });
                 f.AcceptButton = ok;
-                f.CancelButton = cancel;
 
                 while (true)
                 {
-                    var dr = f.ShowDialog(this);
-                    if (dr == DialogResult.OK)
+                    if (f.ShowDialog() == DialogResult.OK)
                     {
                         var name = txt.Text?.Trim();
-                        if (!string.IsNullOrEmpty(name))
-                            return name;
-                        // pokud prázdné, ukaž warning a opakuj dialog
-                        MessageBox.Show(this, "Jméno nesmí být prázdné.", "Chyba", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        continue;
+                        if (!string.IsNullOrEmpty(name)) return name;
+                        MessageBox.Show("Jméno nesmí být prázdné.");
                     }
-                    else
-                    {
-                        // uživatel zrušil -> vrátíme default
-                        return "Hráč";
-                    }
+                    else return "Hráč";
                 }
             }
         }
 
-        private void StartGameAfterName()
+        private void NastavStavHry(bool hrajeme)
         {
-            // Zajistí, že textBoxJmeno nebude interaktivní a hra se spustí
-            textBoxJmeno.Text = playerName;
-            textBoxJmeno.Enabled = false;
-            textBoxJmeno.ReadOnly = true;
-            textBoxJmeno.TabStop = false;
+            // Tlačítka
+            buttonStart.Enabled = !hrajeme;
+            buttonReset.Enabled = !hrajeme;
+            buttonStop.Enabled = hrajeme;
+            button1.Enabled = !hrajeme;
 
-            // Spustit timer hry
-            Casovac.Start();
+            // TabStop = false, aby nekradla focus
+            buttonStop.TabStop = false;
+            buttonStart.TabStop = false;
+            buttonReset.TabStop = false;
 
-            // Aktualizovat GUI aktuálním stavem
+            // Ostatní
+            trackBarSpeed.Enabled = !hrajeme;
+            textBoxJmeno.Enabled = !hrajeme;
+            boxSkore.Enabled = !hrajeme;
+            boxPalivo.Enabled = !hrajeme;
+
+            // Focus na formulář
+            if (hrajeme)
+            {
+                this.ActiveControl = null;
+                this.Focus();
+                hraciPlocha.Focus();
+            }
+        }
+
+        private void StartGame()
+        {
+            NastavStavHry(true);
+            if (!Casovac.Enabled) Casovac.Start();
             AktualizujZivoty();
             AktualizujGUI();
-
-            // Ujistit se, že focus není v textboxu
             this.ActiveControl = null;
         }
 
@@ -156,156 +294,49 @@ namespace raketa_zabka
             m.Image = vzor.Image;
             m.BackColor = Color.Transparent;
             m.SizeMode = PictureBoxSizeMode.Zoom;
+            m.Parent = hraciPlocha;
             m.Top = -vzor.Height;
             m.Left = rnd.Next(0, hraciPlocha.Width - vzor.Width);
             hraciPlocha.Controls.Add(m);
+            m.BringToFront();
             return m;
         }
 
-        // Herní smyčka
-        private void GameLoop(object sender, EventArgs e)
+        private void GameOver()
         {
-            bool hybeSe = false;
-
-            // Pohyb rakety
-            if (pohybVlevo && Raketa.Left > 0)
-            {
-                Raketa.Left -= raketaRychlost;
-                hybeSe = true;
-            }
-            if (pohybVpravo && Raketa.Right < hraciPlocha.Width)
-            {
-                Raketa.Left += raketaRychlost;
-                hybeSe = true;
-            }
-
-            // Ubývání paliva jen při pohybu
-            if (hybeSe)
-            {
-                pohybovyTik++;
-                if (pohybovyTik >= 5)
-                {
-                    palivo--;
-                    pohybovyTik = 0;
-                }
-            }
-
-            if (palivo < 0) palivo = 0;
-
-            // Pohyb meteorů
-            foreach (var meteor in meteory)
-            {
-                meteor.Top += meteoritRychlost;
-
-                if (meteor.Top > hraciPlocha.Height)
-                {
-                    skore++;
-                    ResetujMeteor(meteor);
-                }
-
-                if (Raketa.Bounds.IntersectsWith(meteor.Bounds))
-                {
-                    ResetujMeteor(meteor);
-                    ZtrataZivota();
-                }
-            }
-
-            // Srdce
-            if (srdceCooldown > 0)
-                srdceCooldown--;
-
-            if (!srdce.Visible && srdceCooldown == 0)
-            {
-                // pokud má hráč plné životy, neukazujeme
-                if (zivoty < 3)
-                {
-                    srdce.Left = rnd.Next(0, hraciPlocha.Width - srdce.Width);
-                    srdce.Top = 0;
-                    srdce.Visible = true;
-                }
-
-                srdceCooldown = Math.Max(20, 200 - meteoritRychlost * 10);
-            }
-
-            if (srdce.Visible)
-            {
-                srdce.Top += meteoritRychlost;
-                if (srdce.Top > hraciPlocha.Height)
-                    srdce.Visible = false;
-
-                if (Raketa.Bounds.IntersectsWith(srdce.Bounds))
-                {
-                    if (zivoty < 3)
-                    {
-                        zivoty++;
-                        AktualizujZivoty();
-                    }
-                    srdce.Visible = false;
-                }
-            }
-
-            AktualizujGUI();
-
-            // Konec hry (když dojdou životy nebo palivo)
-            if (zivoty <= 0 || palivo <= 0)
-            {
-                Casovac.Stop();
-                UlozSkoreDoDatabaze();
-                DialogResult result = MessageBox.Show(
-                    this,
-                    $"Konec hry!\nTvoje skóre: {skore}\nChceš hrát znovu?",
-                    "Game Over",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question
-                );
-
-                if (result == DialogResult.Yes)
-                {
-                    buttonReset_Click(null, null);
-                    // Po resetu znovu nastavíme jméno a spustíme
-                    textBoxJmeno.Text = playerName;
-                    Casovac.Start();
-                }
-                else
-                {
-                    this.Close();
-                }
-            }
-        }
-
-        private void button1_Click_Results(object sender, EventArgs e)
-        {
-            FormSkore f = new FormSkore();
-            f.Show();
+            Casovac.Stop();
+            NastavStavHry(false);
+            UlozSkoreDoDatabaze();
+            DialogResult result = MessageBox.Show(this, $"Konec hry!\nSkóre: {skore}\nHrát znovu?", "Game Over", MessageBoxButtons.YesNo);
+            if (result == DialogResult.Yes) { ResetGameData(); StartGame(); }
+            else this.Close();
         }
 
         private void UlozSkoreDoDatabaze()
         {
-            string cesta = "Data Source=databaze.db";
-
-            using (SQLiteConnection conn = new SQLiteConnection(cesta))
+            try
             {
-                conn.Open();
-
-                string sql = "INSERT INTO ScoreLog (Jmeno, Skore, Zivoty, Palivo, Datum) VALUES (@j, @s, @z, @p, @d)";
-
-                using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
+                using (SQLiteConnection conn = new SQLiteConnection("Data Source=databaze.db"))
                 {
-                    cmd.Parameters.AddWithValue("@j", playerName ?? "Hráč");
-                    cmd.Parameters.AddWithValue("@s", skore);
-                    cmd.Parameters.AddWithValue("@z", zivoty);
-                    cmd.Parameters.AddWithValue("@p", palivo);
-                    cmd.Parameters.AddWithValue("@d", DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
-
-                    cmd.ExecuteNonQuery();
+                    conn.Open();
+                    string sql = "INSERT INTO ScoreLog (Jmeno, Skore, Zivoty, Palivo, Datum) VALUES (@j, @s, @z, @p, @d)";
+                    using (SQLiteCommand cmd = new SQLiteCommand(sql, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@j", playerName);
+                        cmd.Parameters.AddWithValue("@s", skore);
+                        cmd.Parameters.AddWithValue("@z", zivoty);
+                        cmd.Parameters.AddWithValue("@p", palivo);
+                        cmd.Parameters.AddWithValue("@d", DateTime.Now.ToString("dd.MM.yyyy HH:mm"));
+                        cmd.ExecuteNonQuery();
+                    }
                 }
             }
+            catch (Exception) { }
         }
 
-        // Pomocné metody
         private void ResetujMeteor(PictureBox meteor)
         {
-            meteor.Top = -rnd.Next(50, 300);
+            meteor.Top = -rnd.Next(50, 400);
             meteor.Left = rnd.Next(0, hraciPlocha.Width - meteor.Width);
         }
 
@@ -322,91 +353,42 @@ namespace raketa_zabka
             Zivot3.Visible = zivoty >= 3;
         }
 
-        // Ovládání kláves
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        private void AktualizujGUI()
         {
-            if (e.KeyCode == Keys.Left)
-                pohybVlevo = true;
-            if (e.KeyCode == Keys.Right)
-                pohybVpravo = true;
+            if (boxSkore != null) boxSkore.Text = skore.ToString();
+            if (boxPalivo != null) boxPalivo.Text = palivo.ToString();
+            if (progressBarFuel != null) progressBarFuel.Value = Math.Max(0, Math.Min(palivo, 100));
+            if (labelInfo != null) labelInfo.Text = $"Skóre: {skore} | Životy: {zivoty} | Palivo: {palivo}%";
         }
 
-        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        private void ResetGameData()
         {
-            if (e.KeyCode == Keys.Left)
-                pohybVlevo = false;
-            if (e.KeyCode == Keys.Right)
-                pohybVpravo = false;
-        }
-
-        private void txt_heading_Click(object sender, EventArgs e) { }
-
-        // Ovládací prvky
-        private void buttonStart_Click(object sender, EventArgs e)
-        {
-            if (!Casovac.Enabled)
-                Casovac.Start();
-
-            buttonStart.Enabled = false;
-            buttonStop.Enabled = true;
-            buttonReset.Enabled = true;
-
-            trackBarSpeed.Enabled = true;
-
-            this.ActiveControl = null;
-
-            ResetGame();
-            btnStart.Enabled = false;
-
-            // Aktivovat prvky až při startu hry
-            Zivot1.Visible = true;
-            Zivot2.Visible = true;
-            Zivot3.Visible = true;
-
-            progressBarPalivo.Enabled = true;
-            trackBarRychlost.Enabled = true;
-            btnNacistSkore.Enabled = true;
-            boxSkore.Enabled = true;
-            boxPalivo.Enabled = true;
-        }
-
-        private void buttonStop_Click(object sender, EventArgs e)
-        {
-            Casovac.Stop();
-            buttonStart.Enabled = true;
-            buttonStop.Enabled = false;
-            buttonReset.Enabled = true;
-
-            trackBarSpeed.Enabled = true;
-        }
-
-        private void buttonReset_Click(object sender, EventArgs e)
-        {
-            Casovac.Stop();
-
             skore = 0;
             zivoty = 3;
             palivo = 100;
             pohybVlevo = false;
             pohybVpravo = false;
+            srdce.Visible = false; // Reset srdce
+            srdceCooldown = 100;
 
             AktualizujGUI();
             AktualizujZivoty();
 
-            foreach (var meteor in meteory)
-                ResetujMeteor(meteor);
+            foreach (var meteor in meteory) ResetujMeteor(meteor);
 
             Raketa.Left = hraciPlocha.Width / 2 - Raketa.Width / 2;
             Raketa.Top = hraciPlocha.Height - Raketa.Height - 10;
-
-            if (progressBarFuel != null)
-                progressBarFuel.Value = 100;
-
-            buttonStart.Enabled = true;
-            buttonStop.Enabled = false;
-            buttonReset.Enabled = true;
         }
 
+        private void Form1_KeyDown(object sender, KeyEventArgs e) { }
+        private void Form1_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Left) pohybVlevo = false;
+            if (e.KeyCode == Keys.Right) pohybVpravo = false;
+        }
+        private void buttonStart_Click(object sender, EventArgs e) { StartGame(); }
+        private void buttonStop_Click(object sender, EventArgs e) { Casovac.Stop(); NastavStavHry(false); }
+        private void buttonReset_Click(object sender, EventArgs e) { Casovac.Stop(); ResetGameData(); NastavStavHry(false); }
         private void trackBarSpeed_Scroll(object sender, EventArgs e)
         {
             raketaRychlost = trackBarSpeed.Value;
@@ -415,26 +397,8 @@ namespace raketa_zabka
             labelSpeedValue.Text = raketaRychlost.ToString();
             this.ActiveControl = null;
         }
-
-        private void AktualizujGUI()
-        {
-            if (boxSkore != null)
-                boxSkore.Text = skore.ToString();
-
-            if (boxPalivo != null)
-                boxPalivo.Text = palivo.ToString();
-
-            if (progressBarFuel != null)
-                progressBarFuel.Value = Math.Max(0, Math.Min(palivo, 100));
-
-            if (labelInfo != null)
-                labelInfo.Text = $"Skóre: {skore} | Životy: {zivoty} | Palivo: {palivo}%";
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-            FormSkore f = new FormSkore();
-            f.Show();
-        }
+        private void button1_Click_Results(object sender, EventArgs e) { new FormSkore().ShowDialog(); }
+        private void txt_heading_Click(object sender, EventArgs e) { }
+        private void label1_Click(object sender, EventArgs e) { }
     }
 }

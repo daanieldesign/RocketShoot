@@ -83,10 +83,41 @@ namespace raketa_zabka.Properties {
         /// <summary>
         ///   Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap pngtree_meteor_fall_with_fire_png_image_133829411 {
+            get {
+                object obj = ResourceManager.GetObject("pngtree-meteor-fall-with-fire-png-image_133829411", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap pngtree_meteor_fall_with_fire_png_image_133829412 {
+            get {
+                object obj = ResourceManager.GetObject("pngtree-meteor-fall-with-fire-png-image_133829412", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap pngtree_missile_rocket_ammunition_war_conflict_military_warhead_nuclear_weapon_bomb_3d_png_image_16644986 {
             get {
                 object obj = ResourceManager.GetObject("pngtree-missile-rocket-ammunition-war-conflict-military-warhead-nuclear-weapon-bo" +
                         "mb-3d-png-image_16644986", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Vyhledává lokalizovaný prostředek typu System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap pngtree_missile_rocket_ammunition_war_conflict_military_warhead_nuclear_weapon_bomb_3d_png_image_166449861 {
+            get {
+                object obj = ResourceManager.GetObject("pngtree-missile-rocket-ammunition-war-conflict-military-warhead-nuclear-weapon-bo" +
+                        "mb-3d-png-image_166449861", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
